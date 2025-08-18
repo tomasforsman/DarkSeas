@@ -1,5 +1,8 @@
 using UnityEngine;
 using DarkSeas.Data;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 namespace DarkSeas.Gameplay.Boat
 {
@@ -15,6 +18,12 @@ namespace DarkSeas.Gameplay.Boat
         [Header("Physics")]
         [SerializeField] private float _dragCoefficient = 0.95f;
         [SerializeField] private float _fuelImpactMultiplier = 0.3f;
+        
+#if ENABLE_INPUT_SYSTEM
+        [Header("Input (New Input System)")]
+        [SerializeField] private InputActionAsset _inputActions;
+        private InputAction _moveAction;
+#endif
 
         private Rigidbody _rigidbody;
         private BoatFuel _boatFuel;
@@ -58,9 +67,36 @@ namespace DarkSeas.Gameplay.Boat
 
         private void HandleInput()
         {
-            _inputVector.x = Input.GetAxis("Horizontal");
-            _inputVector.y = Input.GetAxis("Vertical");
+#if ENABLE_INPUT_SYSTEM
+            if (_moveAction == null && _inputActions != null)
+            {
+                var map = _inputActions.FindActionMap("Player", throwIfNotFound: false);
+                if (map != null)
+                {
+                    _moveAction = map.FindAction("Move", throwIfNotFound: false);
+                    _moveAction?.Enable();
+                }
+            }
+            _inputVector = _moveAction != null ? _moveAction.ReadValue<Vector2>() : Vector2.zero;
+#else
+            _inputVector = new Vector2(
+                Input.GetAxis("Horizontal"),
+                Input.GetAxis("Vertical")
+            );
+#endif
         }
+
+#if ENABLE_INPUT_SYSTEM
+        private void OnEnable()
+        {
+            if (_moveAction != null) _moveAction.Enable();
+        }
+
+        private void OnDisable()
+        {
+            if (_moveAction != null) _moveAction.Disable();
+        }
+#endif
 
         private void ApplyMovement()
         {

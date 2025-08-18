@@ -2,6 +2,9 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using DarkSeas.Core;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 namespace DarkSeas.Gameplay.Interaction
 {
@@ -13,6 +16,12 @@ namespace DarkSeas.Gameplay.Interaction
         [Header("Rescue Settings")]
         [SerializeField] private float _rescueHoldSeconds = 1.5f;
         [SerializeField] private int _maxPassengers = 2;
+
+#if ENABLE_INPUT_SYSTEM
+        [Header("Input (New Input System)")]
+        [SerializeField] private InputActionAsset _inputActions;
+        private InputAction _interactAction;
+#endif
 
         private List<string> _passengers = new List<string>();
         private Coroutine _rescueCoroutine;
@@ -29,15 +38,49 @@ namespace DarkSeas.Gameplay.Interaction
 
         private void HandleRescueInput()
         {
-            if (Input.GetKeyDown(KeyCode.E))
+#if ENABLE_INPUT_SYSTEM
+            if (_interactAction == null && _inputActions != null)
             {
-                StartRescueAttempt();
+                var map = _inputActions.FindActionMap("Player", throwIfNotFound: false);
+                if (map != null)
+                {
+                    _interactAction = map.FindAction("Interact", throwIfNotFound: false);
+                    if (_interactAction != null)
+                    {
+                        _interactAction.started += OnInteractStarted;
+                        _interactAction.canceled += OnInteractCanceled;
+                        _interactAction.Enable();
+                    }
+                }
             }
-            else if (Input.GetKeyUp(KeyCode.E))
+#else
+            // Legacy input fallback (to be removed once Input System is fully wired in scenes)
+            if (Input.GetKeyDown(KeyCode.E)) StartRescueAttempt();
+            else if (Input.GetKeyUp(KeyCode.E)) StopRescueAttempt();
+#endif
+        }
+
+#if ENABLE_INPUT_SYSTEM
+        private void OnDisable()
+        {
+            if (_interactAction != null)
             {
-                StopRescueAttempt();
+                _interactAction.started -= OnInteractStarted;
+                _interactAction.canceled -= OnInteractCanceled;
+                _interactAction.Disable();
             }
         }
+
+        private void OnInteractStarted(InputAction.CallbackContext _)
+        {
+            StartRescueAttempt();
+        }
+
+        private void OnInteractCanceled(InputAction.CallbackContext _)
+        {
+            StopRescueAttempt();
+        }
+#endif
 
         private void StartRescueAttempt()
         {
