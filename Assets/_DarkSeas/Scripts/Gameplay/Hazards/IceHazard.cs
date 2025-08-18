@@ -10,7 +10,7 @@ namespace DarkSeas.Gameplay.Hazards
     {
         [Header("Ice Properties")]
         [SerializeField] private int _size = 1; // 1=Small, 2=Medium, 3=Large
-        [SerializeField] private int _damageAmount = 10;
+        [SerializeField] private int _baseDamage = 10;
         [SerializeField] private float _mass = 1f;
 
         public int Size => _size;
@@ -32,9 +32,12 @@ namespace DarkSeas.Gameplay.Hazards
 
         public int ComputeDamage(float relativeSpeed)
         {
-            // Damage scales with speed and ice size
-            float speedMultiplier = Mathf.Clamp01(relativeSpeed / 10f);
-            return Mathf.RoundToInt(_damageAmount * _size * speedMultiplier);
+            // Damage scales with speed (via RunConfig curve) and ice size
+            var cfg = DarkSeas.GameManager.Instance != null ? DarkSeas.GameManager.Instance.RunConfig : null;
+            float curve = cfg != null && cfg.collisionDamageBySpeed != null
+                ? Mathf.Clamp01(cfg.collisionDamageBySpeed.Evaluate(relativeSpeed))
+                : Mathf.Clamp01(relativeSpeed / 10f);
+            return Mathf.RoundToInt(_baseDamage * _size * curve);
         }
 
         private void OnCollisionEnter(Collision collision)

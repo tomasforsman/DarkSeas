@@ -37,12 +37,25 @@ namespace DarkSeas.Gameplay.Boat
         private void StartSinking()
         {
             _isSinking = true;
-            // TODO: Implement sinking sequence
+            var controller = GetComponent<BoatController>();
+            if (controller != null) controller.enabled = false;
+            StartCoroutine(SinkCoroutine());
         }
 
-        private void OnCollisionEnter(Collision collision)
+        private System.Collections.IEnumerator SinkCoroutine()
         {
-            // TODO: Handle collision damage based on relative velocity
+            float t = 0f;
+            Vector3 startPos = transform.position;
+            Vector3 endPos = startPos + new Vector3(0, -2f, 0);
+            while (t < _sinkDuration)
+            {
+                t += Time.deltaTime;
+                float k = Mathf.Clamp01(t / _sinkDuration);
+                transform.position = Vector3.Lerp(startPos, endPos, k);
+                yield return null;
+            }
+            // Disable after sinking
+            gameObject.SetActive(false);
         }
     }
 }
