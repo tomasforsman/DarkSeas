@@ -15,6 +15,7 @@ namespace DarkSeas.Gameplay.Boat
 
         private float _currentFuel;
         private bool _isEmpty = false;
+        private float _throttleAmount = 0f;
 
         public float CurrentFuel => _currentFuel;
         public float FuelCapacity => _fuelCapacity;
@@ -30,12 +31,17 @@ namespace DarkSeas.Gameplay.Boat
             ConsumeFuel();
         }
 
+        public void SetThrottleInput(float throttleAmount)
+        {
+            _throttleAmount = Mathf.Clamp01(Mathf.Abs(throttleAmount));
+        }
+
         private void ConsumeFuel()
         {
             if (_isEmpty) return;
 
-            float consumption = _baseConsumptionRate * Time.deltaTime;
-            // TODO: Add throttle modifier based on input
+            float throttleMultiplier = 1f + (_throttleAmount * _throttleMultiplier);
+            float consumption = _baseConsumptionRate * throttleMultiplier * Time.deltaTime;
 
             _currentFuel = Mathf.Max(0, _currentFuel - consumption);
 

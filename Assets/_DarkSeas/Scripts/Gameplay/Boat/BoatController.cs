@@ -1,4 +1,5 @@
 using UnityEngine;
+using DarkSeas.Data;
 
 namespace DarkSeas.Gameplay.Boat
 {
@@ -8,17 +9,31 @@ namespace DarkSeas.Gameplay.Boat
     [RequireComponent(typeof(Rigidbody))]
     public class BoatController : MonoBehaviour
     {
-        [Header("Movement Settings")]
-        [SerializeField] private float _maxSpeed = 8f;
-        [SerializeField] private float _acceleration = 2f;
-        [SerializeField] private float _turnRateDegPerSec = 90f;
+        [Header("Configuration")]
+        [SerializeField] private BoatConfig _boatConfig;
+        
+        [Header("Physics")]
+        [SerializeField] private float _dragCoefficient = 0.95f;
+        [SerializeField] private float _fuelImpactMultiplier = 0.3f;
 
         private Rigidbody _rigidbody;
+        private BoatFuel _boatFuel;
         private Vector2 _inputVector;
+        
+        public Vector2 InputVector => _inputVector;
+        public float CurrentSpeed => _rigidbody.velocity.magnitude;
+        public BoatConfig Config => _boatConfig;
 
         private void Awake()
         {
             _rigidbody = GetComponent<Rigidbody>();
+            _boatFuel = GetComponent<BoatFuel>();
+            
+            if (_rigidbody == null)
+            {
+                Debug.LogError($"BoatController on {gameObject.name} requires a Rigidbody component");
+                enabled = false;
+            }
         }
 
         private void Update()
@@ -33,14 +48,64 @@ namespace DarkSeas.Gameplay.Boat
 
         private void HandleInput()
         {
-            // TODO: Implement Input System integration
             _inputVector.x = Input.GetAxis("Horizontal");
             _inputVector.y = Input.GetAxis("Vertical");
         }
 
         private void ApplyMovement()
         {
-            // TODO: Implement boat physics
+            if (_boatConfig == null) return;
+
+            float fuelMultiplier = GetFuelMultiplier();
+            
+            // Update fuel consumption based on throttle input
+            if (_boatFuel != null)
+            {
+                _boatFuel.SetThrottleInput(_inputVector.y);
+            }
+            
+            // Forward/backward movement
+            if (Mathf.Abs(_inputVector.y) > 0.01f)
+            {
+                Vector3 forwardForce = transform.forward * _inputVector.y * _boatConfig.acceleration * fuelMultiplier;
+                _rigidbody.AddForce(forwardForce, ForceMode.Acceleration);
+            }
+
+            // Turning (only when moving)
+            if (Mathf.Abs(_inputVector.x) > 0.01f && CurrentSpeed > 0.5f)
+            {
+                float turnAmount = _inputVector.x * _boatConfig.turnRateDegPerSec * Time.fixedDeltaTime * fuelMultiplier;
+                
+                // Scale turning by current speed (realistic boat physics)
+                float speedFactor = Mathf.Clamp01(CurrentSpeed / _boatConfig.maxSpeed);
+                turnAmount *= speedFactor;
+                
+                transform.Rotate(0, turnAmount, 0);
+            }
+
+            // Apply speed limit
+            if (_rigidbody.velocity.magnitude > _boatConfig.maxSpeed)
+            {
+                _rigidbody.velocity = _rigidbody.velocity.normalized * _boatConfig.maxSpeed;
+            }
+
+            // Apply drag for realistic water physics
+            _rigidbody.velocity *= _dragCoefficient;
+            _rigidbody.angularVelocity *= _dragCoefficient;
+        }
+
+        private float GetFuelMultiplier()
+        {
+            if (_boatFuel == null || !_boatFuel.IsEmpty)
+                return 1f;
+                
+            // Reduced control when out of fuel, but not completely disabled
+            return _fuelImpactMultiplier;
+        }
+
+        public void SetBoatConfig(BoatConfig config)
+        {
+            _boatConfig = config;
         }
     }
 }
