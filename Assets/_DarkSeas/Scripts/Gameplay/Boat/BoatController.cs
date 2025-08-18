@@ -29,6 +29,16 @@ namespace DarkSeas.Gameplay.Boat
             _rigidbody = GetComponent<Rigidbody>();
             _boatFuel = GetComponent<BoatFuel>();
             
+            // Fallback: load default config if none assigned
+            if (_boatConfig == null)
+            {
+                _boatConfig = Resources.Load<BoatConfig>("DefaultBoatConfig");
+                if (_boatConfig == null)
+                {
+                    Debug.LogWarning("BoatController: DefaultBoatConfig not found in Resources. Assign a BoatConfig.");
+                }
+            }
+
             if (_rigidbody == null)
             {
                 Debug.LogError($"BoatController on {gameObject.name} requires a Rigidbody component");
