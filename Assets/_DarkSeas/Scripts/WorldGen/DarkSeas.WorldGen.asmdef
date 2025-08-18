@@ -1,0 +1,17 @@
+{
+    "name": "DarkSeas.WorldGen",
+    "rootNamespace": "DarkSeas.WorldGen",
+    "references": [
+        "DarkSeas.Core",
+        "DarkSeas.Gameplay"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
