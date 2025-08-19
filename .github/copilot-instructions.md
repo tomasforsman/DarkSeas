@@ -156,6 +156,7 @@ Key signal classes:
 - Don't use Update() for expensive operations - cache and batch
 - Don't create circular dependencies between assemblies
 - Don't commit without testing basic boat movement and collision
+- Ignore the files in Issues/ and Codereviews/ unless specifically asked to read them
 
 ### File Management
 - **Always create:** Both .cs and .cs.meta files for scripts
