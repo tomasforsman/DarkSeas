@@ -3,7 +3,8 @@
     "rootNamespace": "DarkSeas.Gameplay",
     "references": [
         "GUID:560b04d1a97f54a4e82edc0cbbb69285",
-        "DarkSeas.Core"
+        "DarkSeas.Core",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

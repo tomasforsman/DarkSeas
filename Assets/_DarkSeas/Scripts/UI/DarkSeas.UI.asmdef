@@ -4,7 +4,8 @@
     "references": [
         "DarkSeas.Core",
         "DarkSeas.Gameplay",
-        "Unity.ugui"
+        "Unity.ugui",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
