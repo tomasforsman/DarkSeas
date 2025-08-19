@@ -33,6 +33,11 @@ namespace DarkSeas.Gameplay.Interaction
 
         private void Update()
         {
+            // Sync duration from config if available
+            if (DarkSeas.GameManager.Instance != null && DarkSeas.GameManager.Instance.RunConfig != null)
+            {
+                _rescueHoldSeconds = DarkSeas.GameManager.Instance.RunConfig.rescueHoldSeconds;
+            }
             HandleRescueInput();
         }
 
@@ -90,6 +95,7 @@ namespace DarkSeas.Gameplay.Interaction
             if (target != null && target.InRange(transform))
             {
                 _currentTarget = target;
+                DarkSeas.Core.RescueSignals.InvokeStarted(target.Id);
                 _rescueCoroutine = StartCoroutine(RescueCoroutine(target));
             }
         }
@@ -100,6 +106,10 @@ namespace DarkSeas.Gameplay.Interaction
             {
                 StopCoroutine(_rescueCoroutine);
                 _rescueCoroutine = null;
+                if (_currentTarget != null)
+                {
+                    DarkSeas.Core.RescueSignals.InvokeCanceled(_currentTarget.Id);
+                }
                 _currentTarget = null;
             }
         }
@@ -112,10 +122,13 @@ namespace DarkSeas.Gameplay.Interaction
             {
                 if (!target.InRange(transform) || IsInterrupted())
                 {
+                    DarkSeas.Core.RescueSignals.InvokeCanceled(target.Id);
                     yield break;
                 }
                 
                 elapsed += Time.deltaTime;
+                float pct = Mathf.Clamp01(elapsed / _rescueHoldSeconds);
+                DarkSeas.Core.RescueSignals.InvokeProgress(target.Id, pct);
                 yield return null;
             }
 
