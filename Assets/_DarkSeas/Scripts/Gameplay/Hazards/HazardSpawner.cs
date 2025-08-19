@@ -20,6 +20,23 @@ namespace DarkSeas.Gameplay.Hazards
 
         private List<GameObject> _spawnedHazards = new List<GameObject>();
 
+        private void Awake()
+        {
+            // Pull defaults from RunConfig if available
+            var cfg = DarkSeas.GameManager.Instance != null ? DarkSeas.GameManager.Instance.RunConfig : null;
+            if (cfg != null)
+            {
+                _minIceCount = cfg.minIceCount;
+                _minSpacing = cfg.minHazardSpacing;
+                _spawnArea = cfg.patchSize;
+            }
+
+            // Auto-assign prefabs from Resources if missing
+            if (_smallIcePrefab == null) _smallIcePrefab = Resources.Load<GameObject>("Hazards/Ice_Small");
+            if (_mediumIcePrefab == null) _mediumIcePrefab = Resources.Load<GameObject>("Hazards/Ice_Medium");
+            if (_largeIcePrefab == null) _largeIcePrefab = Resources.Load<GameObject>("Hazards/Ice_Large");
+        }
+
         public void SpawnHazards(int seed)
         {
             ClearExistingHazards();
@@ -41,6 +58,14 @@ namespace DarkSeas.Gameplay.Hazards
             {
                 GameObject ice = Instantiate(prefab, position, Random.rotation);
                 _spawnedHazards.Add(ice);
+            }
+            else if (prefab == null && IsValidSpawnPosition(position))
+            {
+                // Fallback: create simple cube with IceHazard
+                var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                go.transform.position = position;
+                var ice = go.AddComponent<IceHazard>();
+                _spawnedHazards.Add(go);
             }
         }
 
