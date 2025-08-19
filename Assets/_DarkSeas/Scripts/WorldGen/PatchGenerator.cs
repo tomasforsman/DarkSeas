@@ -122,7 +122,20 @@ namespace DarkSeas.WorldGen
             {
                 if (obj != null)
                 {
-                    DestroyImmediate(obj);
+#if UNITY_EDITOR
+                    // Use DestroyImmediate only in editor for immediate cleanup during edit-time generation
+                    if (!Application.isPlaying)
+                    {
+                        DestroyImmediate(obj);
+                    }
+                    else
+                    {
+                        Destroy(obj);
+                    }
+#else
+                    // In builds, always use Destroy for runtime safety
+                    Destroy(obj);
+#endif
                 }
             }
             _generatedObjects.Clear();

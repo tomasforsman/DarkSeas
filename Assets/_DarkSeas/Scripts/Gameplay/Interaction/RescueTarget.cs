@@ -22,6 +22,18 @@ namespace DarkSeas.Gameplay.Interaction
                 _id = System.Guid.NewGuid().ToString();
             }
         }
+        
+        private void Start()
+        {
+            // Register this target for efficient detection
+            RescueInteractor.RegisterTarget(this);
+        }
+        
+        private void OnDestroy()
+        {
+            // Unregister when destroyed
+            RescueInteractor.UnregisterTarget(this);
+        }
 
         public bool InRange(Transform target)
         {
@@ -36,6 +48,8 @@ namespace DarkSeas.Gameplay.Interaction
             if (_isClaimed) return null;
             
             _isClaimed = true;
+            // Unregister when claimed to remove from available targets
+            RescueInteractor.UnregisterTarget(this);
             gameObject.SetActive(false);
             return _id;
         }
