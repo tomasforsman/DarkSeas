@@ -1,79 +1,39 @@
 using UnityEngine;
-using System.Collections.Generic;
-using DarkSeas.Data;
 
 namespace DarkSeas.Meta.Legacy
 {
     /// <summary>
-    /// Manages Legacy Points accumulation and upgrade purchases
+    /// Tracks Legacy Points earned from deliveries. Simple singleton for MVP.
     /// </summary>
     public class LegacyManager : MonoBehaviour
     {
-        [Header("Legacy State")]
-        [SerializeField] private int _currentLegacyPoints = 0;
-        [SerializeField] private List<string> _purchasedUpgrades = new List<string>();
-
-        public int CurrentLegacyPoints => _currentLegacyPoints;
-        public IReadOnlyList<string> PurchasedUpgrades => _purchasedUpgrades;
-
-        private void Awake()
+        private static LegacyManager _instance;
+        public static LegacyManager Instance
         {
-            LoadLegacyData();
-        }
-
-        public void AddLegacyPoints(int points)
-        {
-            _currentLegacyPoints += points;
-            SaveLegacyData();
-        }
-
-        public bool CanPurchaseUpgrade(UpgradeDef upgrade)
-        {
-            if (upgrade == null) return false;
-            if (_currentLegacyPoints < upgrade.legacyCost) return false;
-            if (!upgrade.stackable && _purchasedUpgrades.Contains(upgrade.id)) return false;
-            
-            return true;
-        }
-
-        public bool PurchaseUpgrade(UpgradeDef upgrade)
-        {
-            if (!CanPurchaseUpgrade(upgrade)) return false;
-
-            _currentLegacyPoints -= upgrade.legacyCost;
-            _purchasedUpgrades.Add(upgrade.id);
-            
-            SaveLegacyData();
-            return true;
-        }
-
-        public int GetUpgradeCount(string upgradeId)
-        {
-            int count = 0;
-            foreach (string id in _purchasedUpgrades)
+            get
             {
-                if (id == upgradeId) count++;
-            }
-            return count;
-        }
-
-        private void LoadLegacyData()
-        {
-            _currentLegacyPoints = PlayerPrefs.GetInt("Legacy_Points", 0);
-            
-            string upgradesJson = PlayerPrefs.GetString("Legacy_Upgrades", "");
-            if (!string.IsNullOrEmpty(upgradesJson))
-            {
-                // TODO: Implement JSON deserialization for upgrades list
+                if (_instance == null)
+                {
+                    var go = new GameObject("LegacyManager");
+                    _instance = go.AddComponent<LegacyManager>();
+                    DontDestroyOnLoad(go);
+                }
+                return _instance;
             }
         }
 
-        private void SaveLegacyData()
+        [SerializeField] private int _legacyPoints = 0;
+        [SerializeField] private int _pointsPerPassenger = 1;
+
+        public int LegacyPoints => _legacyPoints;
+        public int PointsPerPassenger => _pointsPerPassenger;
+
+        public void AddFromPassengers(int passengerCount)
         {
-            PlayerPrefs.SetInt("Legacy_Points", _currentLegacyPoints);
-            
-            // TODO: Implement JSON serialization for upgrades list
-            PlayerPrefs.Save();
+            if (passengerCount <= 0) return;
+            _legacyPoints += passengerCount * _pointsPerPassenger;
+            Debug.Log($"LegacyManager: +{passengerCount * _pointsPerPassenger} points (total: {_legacyPoints})");
         }
     }
 }
+
