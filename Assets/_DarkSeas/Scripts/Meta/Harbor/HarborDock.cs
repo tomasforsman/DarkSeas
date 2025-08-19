@@ -1,6 +1,7 @@
 using UnityEngine;
 using DarkSeas.Gameplay.Interaction;
 using DarkSeas.Meta.Legacy;
+using DarkSeas.Core;
 
 namespace DarkSeas.Meta.Harbor
 {
@@ -46,11 +47,14 @@ namespace DarkSeas.Meta.Harbor
             {
                 int count = interactor.PassengerCount;
                 LegacyManager.Instance.AddFromPassengers(count);
+                DeliverySignals.InvokeDelivered(count, count * LegacyManager.Instance.PointsPerPassenger);
                 interactor.DeliverPassengers();
                 _lastDeliveryTime = Time.time;
                 Debug.Log($"Delivered {count} passengers at harbor.");
+
+                // End of run after docking with passengers
+                RunSignals.InvokeRunEnd("Delivered", count);
             }
         }
     }
 }
-

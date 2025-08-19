@@ -3,48 +3,51 @@ using DarkSeas.Core;
 
 namespace DarkSeas.Gameplay.Run
 {
+    public enum RunState { Harbor, Expedition, Debrief }
+
     /// <summary>
-    /// State machine handling Harbor → Expedition → Debrief transitions
+    /// Minimal run state machine for MVP flows.
     /// </summary>
     public class RunStateMachine : MonoBehaviour
     {
-        public enum RunState
+        [SerializeField] private RunState _state = RunState.Harbor;
+        [SerializeField] private int _currentSeed = 0;
+
+        public RunState State => _state;
+        public int CurrentSeed => _currentSeed;
+
+        private void OnEnable()
         {
-            Harbor,
-            Expedition,
-            Debrief
+            RunSignals.RunEnd += OnRunEnd;
         }
 
-        [Header("Current State")]
-        [SerializeField] private RunState _currentState = RunState.Harbor;
-
-        public RunState CurrentState => _currentState;
-
-        public void TransitionToExpedition(int seed)
+        private void OnDisable()
         {
-            if (_currentState != RunState.Harbor) return;
+            RunSignals.RunEnd -= OnRunEnd;
+        }
 
-            _currentState = RunState.Expedition;
+        public void StartRun(int seed)
+        {
+            _currentSeed = seed;
+            _state = RunState.Expedition;
             RunSignals.InvokeRunStart(seed);
-            
-            // TODO: Load expedition scene or enable expedition systems
-        }
-
-        public void TransitionToDebrief(string result, int rescuedCount)
-        {
-            if (_currentState != RunState.Expedition) return;
-
-            _currentState = RunState.Debrief;
-            RunSignals.InvokeRunEnd(result, rescuedCount);
-            
-            // TODO: Show debrief screen
         }
 
         public void ReturnToHarbor()
         {
-            _currentState = RunState.Harbor;
-            
-            // TODO: Return to harbor scene or enable harbor systems
+            _state = RunState.Harbor;
+        }
+
+        public void EndRun(string result, int rescuedCount)
+        {
+            RunSignals.InvokeRunEnd(result, rescuedCount);
+            _state = RunState.Debrief;
+        }
+
+        private void OnRunEnd(string result, int rescuedCount)
+        {
+            _state = RunState.Debrief;
         }
     }
 }
+

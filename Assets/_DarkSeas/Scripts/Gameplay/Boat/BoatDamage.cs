@@ -40,6 +40,9 @@ namespace DarkSeas.Gameplay.Boat
             var controller = GetComponent<BoatController>();
             if (controller != null) controller.enabled = false;
             StartCoroutine(SinkCoroutine());
+
+            // End the run due to sinking
+            DarkSeas.Core.RunSignals.InvokeRunEnd("Sank", 0);
         }
 
         private System.Collections.IEnumerator SinkCoroutine()
