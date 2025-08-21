@@ -4,6 +4,7 @@
     "references": [
         "DarkSeas.Core",
         "DarkSeas.Gameplay",
+        "DarkSeas.MetaProgression",
         "Unity.ugui",
         "Unity.InputSystem"
     ],
