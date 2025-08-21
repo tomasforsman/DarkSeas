@@ -1,5 +1,4 @@
 using UnityEngine;
-using DarkSeas.Gameplay.Run;
 using DarkSeas.Data;
 
 namespace DarkSeas
@@ -10,7 +9,6 @@ namespace DarkSeas
     public class GameManager : MonoBehaviour
     {
         [Header("References")]
-        [SerializeField] private RunStateMachine _runStateMachine;
         [SerializeField] private RunConfig _runConfig;
         
         private static GameManager _instance;
