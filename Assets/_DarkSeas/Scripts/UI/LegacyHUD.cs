@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
-using DarkSeas.Meta.Legacy;
+using DarkSeas.MetaProgression.Legacy;
 using DarkSeas.Core;
 
 namespace DarkSeas.UI

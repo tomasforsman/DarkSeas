@@ -29,7 +29,7 @@ namespace DarkSeas.Gameplay.Boat
         private Vector2 _inputVector;
         
         public Vector2 InputVector => _inputVector;
-        public float CurrentSpeed => _rigidbody.velocity.magnitude;
+        public float CurrentSpeed => _rigidbody.linearVelocity.magnitude;
         public BoatConfig Config => _boatConfig;
 
         private void Awake()
@@ -56,8 +56,8 @@ namespace DarkSeas.Gameplay.Boat
             // Configure physics properties from BoatConfig
             if (_rigidbody != null && _boatConfig != null)
             {
-                _rigidbody.drag = _boatConfig.drag;
-                _rigidbody.angularDrag = _boatConfig.angularDrag;
+                _rigidbody.linearDamping = _boatConfig.drag;
+                _rigidbody.angularDamping = _boatConfig.angularDrag;
             }
         }
 
@@ -138,9 +138,9 @@ namespace DarkSeas.Gameplay.Boat
             }
 
             // Apply speed limit using force-based braking instead of direct velocity writes
-            if (_rigidbody.velocity.magnitude > _boatConfig.maxSpeed)
+            if (_rigidbody.linearVelocity.magnitude > _boatConfig.maxSpeed)
             {
-                Vector3 excessVelocity = _rigidbody.velocity - _rigidbody.velocity.normalized * _boatConfig.maxSpeed;
+                Vector3 excessVelocity = _rigidbody.linearVelocity - _rigidbody.linearVelocity.normalized * _boatConfig.maxSpeed;
                 _rigidbody.AddForce(-excessVelocity * 10f, ForceMode.Acceleration); // Brake force to limit speed
             }
         }
