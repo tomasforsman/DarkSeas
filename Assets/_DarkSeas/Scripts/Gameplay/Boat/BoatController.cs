@@ -16,7 +16,6 @@ namespace DarkSeas.Gameplay.Boat
         [SerializeField] private BoatConfig _boatConfig;
         
         [Header("Physics")]
-        [SerializeField] private float _dragCoefficient = 0.95f;
         [SerializeField] private float _fuelImpactMultiplier = 0.3f;
         
 #if ENABLE_INPUT_SYSTEM
@@ -52,6 +51,13 @@ namespace DarkSeas.Gameplay.Boat
             {
                 Debug.LogError($"BoatController on {gameObject.name} requires a Rigidbody component");
                 enabled = false;
+            }
+            
+            // Configure physics properties from BoatConfig
+            if (_rigidbody != null && _boatConfig != null)
+            {
+                _rigidbody.drag = _boatConfig.drag;
+                _rigidbody.angularDrag = _boatConfig.angularDrag;
             }
         }
 
@@ -117,27 +123,26 @@ namespace DarkSeas.Gameplay.Boat
                 _rigidbody.AddForce(forwardForce, ForceMode.Acceleration);
             }
 
-            // Turning (only when moving)
+            // Turning (only when moving) - use physics-friendly rotation
             if (Mathf.Abs(_inputVector.x) > 0.01f && CurrentSpeed > 0.5f)
             {
-                float turnAmount = _inputVector.x * _boatConfig.turnRateDegPerSec * Time.fixedDeltaTime * fuelMultiplier;
+                float turnRate = _inputVector.x * _boatConfig.turnRateDegPerSec * Time.fixedDeltaTime * fuelMultiplier;
                 
                 // Scale turning by current speed (realistic boat physics)
                 float speedFactor = Mathf.Clamp01(CurrentSpeed / _boatConfig.maxSpeed);
-                turnAmount *= speedFactor;
+                turnRate *= speedFactor;
                 
-                transform.Rotate(0, turnAmount, 0);
+                // Use physics-friendly rotation
+                Quaternion targetRotation = transform.rotation * Quaternion.Euler(0, turnRate, 0);
+                _rigidbody.MoveRotation(targetRotation);
             }
 
-            // Apply speed limit
+            // Apply speed limit using force-based braking instead of direct velocity writes
             if (_rigidbody.velocity.magnitude > _boatConfig.maxSpeed)
             {
-                _rigidbody.velocity = _rigidbody.velocity.normalized * _boatConfig.maxSpeed;
+                Vector3 excessVelocity = _rigidbody.velocity - _rigidbody.velocity.normalized * _boatConfig.maxSpeed;
+                _rigidbody.AddForce(-excessVelocity * 10f, ForceMode.Acceleration); // Brake force to limit speed
             }
-
-            // Apply drag for realistic water physics
-            _rigidbody.velocity *= _dragCoefficient;
-            _rigidbody.angularVelocity *= _dragCoefficient;
         }
 
         private float GetFuelMultiplier()

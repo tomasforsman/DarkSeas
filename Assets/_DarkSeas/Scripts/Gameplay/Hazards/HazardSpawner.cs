@@ -102,7 +102,20 @@ namespace DarkSeas.Gameplay.Hazards
             {
                 if (hazard != null)
                 {
-                    DestroyImmediate(hazard);
+#if UNITY_EDITOR
+                    // Use DestroyImmediate only in editor for immediate cleanup during edit-time generation
+                    if (!Application.isPlaying)
+                    {
+                        DestroyImmediate(hazard);
+                    }
+                    else
+                    {
+                        Destroy(hazard);
+                    }
+#else
+                    // In builds, always use Destroy for runtime safety
+                    Destroy(hazard);
+#endif
                 }
             }
             _spawnedHazards.Clear();

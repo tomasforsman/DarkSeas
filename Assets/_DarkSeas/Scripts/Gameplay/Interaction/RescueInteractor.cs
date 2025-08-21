@@ -26,6 +26,9 @@ namespace DarkSeas.Gameplay.Interaction
         private List<string> _passengers = new List<string>();
         private Coroutine _rescueCoroutine;
         private RescueTarget _currentTarget;
+        
+        // Cached rescue targets to avoid FindObjectsOfType calls
+        private static List<RescueTarget> _availableTargets = new List<RescueTarget>();
 
         public int PassengerCount => _passengers.Count;
         public int MaxPassengers => _maxPassengers;
@@ -146,15 +149,37 @@ namespace DarkSeas.Gameplay.Interaction
 
         private RescueTarget FindNearbyTarget()
         {
-            RescueTarget[] targets = FindObjectsOfType<RescueTarget>();
-            foreach (var target in targets)
+            // Use cached targets instead of expensive FindObjectsOfType
+            foreach (var target in _availableTargets)
             {
-                if (target.InRange(transform))
+                if (target != null && target.InRange(transform))
                 {
                     return target;
                 }
             }
             return null;
+        }
+        
+        /// <summary>
+        /// Register a rescue target for efficient detection
+        /// </summary>
+        public static void RegisterTarget(RescueTarget target)
+        {
+            if (target != null && !_availableTargets.Contains(target))
+            {
+                _availableTargets.Add(target);
+            }
+        }
+        
+        /// <summary>
+        /// Unregister a rescue target when it's no longer available
+        /// </summary>
+        public static void UnregisterTarget(RescueTarget target)
+        {
+            if (target != null)
+            {
+                _availableTargets.Remove(target);
+            }
         }
 
         private bool IsInterrupted()

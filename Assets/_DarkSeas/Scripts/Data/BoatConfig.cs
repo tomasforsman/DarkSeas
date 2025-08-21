@@ -16,6 +16,10 @@ namespace DarkSeas.Data
         public float acceleration = 2f;
         public float turnRateDegPerSec = 90f;
         
+        [Header("Physics")]
+        public float drag = 1f;
+        public float angularDrag = 5f;
+        
         [Header("Durability")]
         public int hullHP = 100;
         public float fuelCapacity = 180f;
