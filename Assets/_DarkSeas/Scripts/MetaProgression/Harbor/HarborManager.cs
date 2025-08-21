@@ -43,7 +43,7 @@ namespace DarkSeas.MetaProgression.Harbor
             if (passengerCount > 0)
             {
                 // Convert rescued survivors to Legacy Points
-                _legacyManager.AddLegacyPoints(passengerCount);
+                _legacyManager.AddFromPassengers(passengerCount);
                 rescueInteractor.DeliverPassengers();
                 
                 // TODO: Trigger visual/audio feedback
