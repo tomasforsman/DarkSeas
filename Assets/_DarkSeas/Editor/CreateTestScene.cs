@@ -6,6 +6,7 @@ using UnityEngine.InputSystem;
 using DarkSeas.Gameplay.Boat;
 using DarkSeas.Gameplay.Interaction;
 using DarkSeas.Data;
+using DarkSeas.MetaProgression.Harbor;
 using DarkSeas.UI;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -39,7 +40,7 @@ namespace DarkSeas.Editor
             dock.name = "HarborDock";
             dock.transform.position = new Vector3(0, 0.5f, -40);
             dock.transform.localScale = new Vector3(4, 1, 8);
-            var dockScript = dock.AddComponent<DarkSeas.Meta.Harbor.HarborDock>();
+            var dockScript = dock.AddComponent<HarborDock>();
             var dockCol = dock.GetComponent<Collider>();
             if (dockCol != null) dockCol.isTrigger = true;
 

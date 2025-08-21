@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace DarkSeas.Meta.Legacy
+namespace DarkSeas.MetaProgression.Legacy
 {
     /// <summary>
     /// Tracks Legacy Points earned from deliveries. Simple singleton for MVP.

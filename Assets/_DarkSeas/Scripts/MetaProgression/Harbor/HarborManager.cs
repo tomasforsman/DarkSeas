@@ -1,8 +1,8 @@
-using UnityEngine;
-using DarkSeas.Meta.Legacy;
 using DarkSeas.Gameplay.Interaction;
+using DarkSeas.MetaProgression.Legacy;
+using UnityEngine;
 
-namespace DarkSeas.Meta.Harbor
+namespace DarkSeas.MetaProgression.Harbor
 {
     /// <summary>
     /// Manages harbor functionality and survivor delivery

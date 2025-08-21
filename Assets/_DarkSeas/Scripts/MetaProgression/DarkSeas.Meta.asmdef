@@ -1,6 +1,6 @@
 {
-    "name": "DarkSeas.Meta",
-    "rootNamespace": "DarkSeas.Meta",
+    "name": "DarkSeas.MetaProgression",
+    "rootNamespace": "DarkSeas.MetaProgression",
     "references": [
         "DarkSeas.Core",
         "DarkSeas.Gameplay"

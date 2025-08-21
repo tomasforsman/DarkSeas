@@ -1,9 +1,9 @@
-using UnityEngine;
-using DarkSeas.Gameplay.Interaction;
-using DarkSeas.Meta.Legacy;
 using DarkSeas.Core;
+using DarkSeas.Gameplay.Interaction;
+using DarkSeas.MetaProgression.Legacy;
+using UnityEngine;
 
-namespace DarkSeas.Meta.Harbor
+namespace DarkSeas.MetaProgression.Harbor
 {
     /// <summary>
     /// Trigger zone that delivers passengers and awards Legacy Points.
